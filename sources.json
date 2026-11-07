@@ -1,0 +1,32 @@
+{
+  "sources": [
+    {
+      "id": "age-c1-2025",
+      "name": "Inap-convocatoria-2025-admin",
+      "url": "https://sede.inap.gob.es/es/procedimientos-y-servicios/seleccion/procesos-selectivos-de-cuerpos-y-escalas-generales/cuerpo-general-administrativo-de-la-administracion-del-estado-ingreso-libre-convocatoria-2025",
+      "selector": "main a[href]",
+      "mode": "documents",
+      "link_include": [],
+      "link_exclude": [],
+      "extensions": [
+        ".pdf",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+        ".zip"
+      ],
+      "download_markers": [
+        "/download/",
+        "/downloads/",
+        "/documents/",
+        "/document_library/",
+        "/descarga/",
+        "/descargas/",
+        "/dam/",
+        "/sites/default/files/"
+      ],
+      "enabled": false
+    }
+  ]
+}

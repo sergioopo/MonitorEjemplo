@@ -1,0 +1,58 @@
+name: Monitor genérico de documentos
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simular sin enviar ni modificar el estado"
+        required: false
+        type: boolean
+        default: false
+      send_test:
+        description: "Enviar archivo de prueba a Telegram"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: documentos-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Ejecutar pruebas
+        run: python -m unittest discover -s tests -v
+      - name: Monitorizar documentos
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          SEND_TEST: ${{ inputs.send_test }}
+        run: |
+          args=()
+          if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ "$SEND_TEST" = "true" ]; then args+=(--send-test); fi
+          python monitor.py "${args[@]}"
+      - name: Guardar estado (incluso en caso de fallo)
+        if: always()
+        run: |
+          if [ ! -f state.json ]; then exit 0; fi
+          git add -- state.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name documentos-monitor-bot
+          git config user.email documentos-monitor-bot@users.noreply.github.com
+          git commit -m 'Actualizar estado del monitor'
+          git pull --rebase
+          git push
